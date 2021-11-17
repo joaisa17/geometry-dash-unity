@@ -50,14 +50,14 @@ public class CameraHandler : MonoBehaviour
         SpriteRenderer groundRenderer = ground.GetComponent<SpriteRenderer>();
 
         Vector2 screenBounds = cam.ScreenToWorldPoint(new Vector3(
-            Screen.width,
-            Screen.height,
+            0,
+            0,
             cam.transform.position.z
         ));
 
         ground.transform.position = new Vector3(
             ground.transform.position.x,
-            -screenBounds.y - groundRenderer.bounds.extents.y,
+            screenBounds.y + groundRenderer.bounds.extents.y,
             ground.transform.position.z
         );
     }

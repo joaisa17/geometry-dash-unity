@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
 public class Player : MonoBehaviour
 {
     public Collider2D finishTrigger;
@@ -30,6 +29,8 @@ public class Player : MonoBehaviour
     private bool isTouchingObject = true;
 
     private bool dead = false;
+
+    private int gravityMultiplier = 1;
 
     // Runs when script has initialized
     void Awake()
@@ -77,7 +78,7 @@ public class Player : MonoBehaviour
         canJump = false;
 
         rb.angularVelocity = 0;
-        rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
+        rb.velocity = new Vector2(rb.velocity.x, jumpingPower * gravityMultiplier);
     }
 
     private void OnCollisionEnter2D()
@@ -92,11 +93,19 @@ public class Player : MonoBehaviour
         isTouchingObject = false;
     }
 
+    private bool TriggerKillsPlayer(Collider2D collision)
+    {
+        GameObject go = collision.gameObject;
+        if (go.GetComponent<JumpPad>() || go.GetComponent<GravityPad>() || go.GetComponent<GravityPortal>()) return false;
+
+        return true;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision == finishTrigger) winEvent.Invoke();
 
-        else Die();
+        else if (TriggerKillsPlayer(collision)) Die();
     }
 
     // Runs once per frame
@@ -106,11 +115,13 @@ public class Player : MonoBehaviour
 
         if (!dead)
         {
+            gravityMultiplier = rb.gravityScale < 0 ? -1 : 1;
+
             rb.velocity = new Vector2(movementSpeed, rb.velocity.y);
 
             if (!isTouchingObject)
             {
-                rb.SetRotation(rb.rotation - rotationSpeed * Time.fixedDeltaTime);
+                rb.SetRotation(rb.rotation - rotationSpeed * Time.deltaTime * gravityMultiplier);
             }
 
             else
