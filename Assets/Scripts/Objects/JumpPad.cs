@@ -1,18 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class JumpPad : MonoBehaviour
+namespace Assets.Scripts.Objects
 {
-    public float boostHeight = 50f;
-
-    private bool debounce = false;
-    private void OnTriggerEnter2D(Collider2D collision)
+    public class JumpPad : MonoBehaviour
     {
-        Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
+        public float boostHeight = 50f;
 
-        if (rb != null && !debounce)
+        private bool debounce;
+
+        private void OnTriggerEnter2D(Collider2D collision)
         {
+            var rb = collision.gameObject.GetComponent<Rigidbody2D>();
+
+            if (rb == null || debounce) return;
+
             debounce = true;
 
             rb.velocity = new Vector2(

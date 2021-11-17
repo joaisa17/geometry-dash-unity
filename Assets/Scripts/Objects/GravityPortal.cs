@@ -1,23 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class GravityPortal : MonoBehaviour
+namespace Assets.Scripts.Objects
 {
-    public bool inverse = false;
-
-    private bool debounce = false;
-    private void OnTriggerEnter2D(Collider2D collision)
+    public class GravityPortal : MonoBehaviour
     {
-        Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
+        public bool inverse = false;
 
-        if (rb != null && !debounce)
+        private bool debounce;
+
+        private void OnTriggerEnter2D(Collider2D collision)
         {
+            var rb = collision.gameObject.GetComponent<Rigidbody2D>();
+
+            if (rb == null || debounce) return;
+
             debounce = true;
 
             rb.gravityScale = inverse ?
-            rb.gravityScale > 0 ? -rb.gravityScale : rb.gravityScale :
-            rb.gravityScale < 0 ? -rb.gravityScale : rb.gravityScale;
+                rb.gravityScale > 0 ? -rb.gravityScale : rb.gravityScale :
+                rb.gravityScale < 0 ? -rb.gravityScale : rb.gravityScale;
         }
     }
 }

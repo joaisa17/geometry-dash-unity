@@ -1,91 +1,92 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraHandler : MonoBehaviour
+namespace Assets.Scripts.Game
 {
-    public GameObject player;
-    public GameObject ground;
-
-    public Vector2 positionOffset;
-
-    public float moveTime = 0.5f;
-
-    private Rigidbody2D rb;
-    private float currentSpeed = 0;
-
-    private float originX;
-
-    private bool active = false;
-
-    public void ResetState()
+    public class CameraHandler : MonoBehaviour
     {
-        active = false;
-    }
+        public GameObject player;
+        public GameObject ground;
 
-    public void Init()
-    {
-        active = true;
-    }
+        public Vector2 positionOffset;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        rb = player.GetComponent<Rigidbody2D>();
-        originX = transform.position.x;
+        public float moveTime = 0.5f;
 
-        Camera cam = Camera.main;
+        private Rigidbody2D rb;
+        private float currentSpeed;
 
-        float camHeight = cam.orthographicSize * 2;
-        float camWidth = camHeight * Screen.width / Screen.height;
+        private float originX;
 
-        Vector3 currentScale = ground.transform.localScale;
+        private bool active;
 
-        ground.transform.localScale = new Vector3(
-            camWidth + 5,
-            currentScale.y,
-            currentScale.z
-        );
+        public void ResetState()
+        {
+            active = false;
+        }
 
-        SpriteRenderer groundRenderer = ground.GetComponent<SpriteRenderer>();
+        public void Init()
+        {
+            active = true;
+        }
 
-        Vector2 screenBounds = cam.ScreenToWorldPoint(new Vector3(
-            0,
-            0,
-            cam.transform.position.z
-        ));
+        // Start is called before the first frame update
+        private void Start()
+        {
+            rb = player.GetComponent<Rigidbody2D>();
+            originX = transform.position.x;
 
-        ground.transform.position = new Vector3(
-            ground.transform.position.x,
-            screenBounds.y + groundRenderer.bounds.extents.y,
-            ground.transform.position.z
-        );
-    }
+            var cam = Camera.main;
 
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-        if (!active) return;
+            var camHeight = cam.orthographicSize * 2;
+            var camWidth = camHeight * Screen.width / Screen.height;
 
-        float targetPos = Mathf.Clamp(rb.position.x + positionOffset.x, originX, Mathf.Infinity);
+            var currentScale = ground.transform.localScale;
 
-        float newPos = Mathf.SmoothDamp(
-            transform.position.x,
-            targetPos,
-            ref currentSpeed,
-            moveTime
-        );
+            ground.transform.localScale = new Vector3(
+                camWidth + 5,
+                currentScale.y,
+                currentScale.z
+            );
 
-        transform.position = new Vector3(
-            newPos,
-            transform.position.y + positionOffset.y,
-            transform.position.z
-        );
+            var groundRenderer = ground.GetComponent<SpriteRenderer>();
 
-        ground.transform.position = new Vector3(
-            transform.position.x,
-            ground.transform.position.y,
-            ground.transform.position.z
-        );
+            Vector2 screenBounds = cam.ScreenToWorldPoint(new Vector3(
+                0,
+                0,
+                cam.transform.position.z
+            ));
+
+            ground.transform.position = new Vector3(
+                ground.transform.position.x,
+                screenBounds.y + groundRenderer.bounds.extents.y,
+                ground.transform.position.z
+            );
+        }
+
+        // Update is called once per frame
+        private void FixedUpdate()
+        {
+            if (!active) return;
+
+            var targetPos = Mathf.Clamp(rb.position.x + positionOffset.x, originX, Mathf.Infinity);
+
+            var newPos = Mathf.SmoothDamp(
+                transform.position.x,
+                targetPos,
+                ref currentSpeed,
+                moveTime
+            );
+
+            transform.position = new Vector3(
+                newPos,
+                transform.position.y + positionOffset.y,
+                transform.position.z
+            );
+
+            ground.transform.position = new Vector3(
+                transform.position.x,
+                ground.transform.position.y,
+                ground.transform.position.z
+            );
+        }
     }
 }
