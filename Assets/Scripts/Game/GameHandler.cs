@@ -1,44 +1,49 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
-public class GameHandler : MonoBehaviour
+namespace Assets.Scripts.Game
 {
-    public UnityEvent startEvent;
-
-    // Start is called before the first frame update
-    void Start()
+    public class GameHandler : MonoBehaviour
     {
-        StartCoroutine(Init());
-    }
+        public UnityEvent startEvent;
 
-    // We use a coroutine to be able to use wait time
-    IEnumerator Init()
-    {
-        yield return new WaitForSeconds(0.25f);
+        // Start is called before the first frame update
+        private void Start()
+        {
+            StartCoroutine(Init());
+        }
 
-        startEvent.Invoke();
-    }
+        // We use a coroutine to be able to use wait time
+        private IEnumerator Init()
+        {
+            yield return new WaitForSeconds(0.25f);
 
-    public void OnPlayerWin()
-    {
-        int sceneCount = SceneManager.sceneCount;
-        int currentScene = SceneManager.GetActiveScene().buildIndex;
-        int nextScene = currentScene == sceneCount ? 0 : currentScene + 1;
+            startEvent.Invoke();
+        }
 
-        SceneManager.LoadScene(nextScene);
-    }
+        public void OnPlayerWin()
+        {
+            var sceneCount = SceneManager.sceneCount;
+            var currentScene = SceneManager.GetActiveScene().buildIndex;
+            var nextScene = currentScene == sceneCount ? 0 : currentScene + 1;
 
-    public void OnPlayerDied()
-    {
-        StartCoroutine(PlayerDied());
-    }
+            SceneManager.LoadScene(nextScene);
+        }
 
-    IEnumerator PlayerDied()
-    {
-        GetComponent<AudioSource>().Stop();
-        yield return new WaitForSeconds(1f);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        public void OnPlayerDied()
+        {
+            StartCoroutine(PlayerDied());
+        }
+
+        public IEnumerator PlayerDied()
+        {
+            GetComponent<AudioSource>().Stop();
+
+            yield return new WaitForSeconds(1f);
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 }
