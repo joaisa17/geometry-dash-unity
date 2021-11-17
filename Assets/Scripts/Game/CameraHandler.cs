@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Camera : MonoBehaviour
+public class CameraHandler : MonoBehaviour
 {
     public GameObject player;
     public GameObject ground;
@@ -33,6 +33,33 @@ public class Camera : MonoBehaviour
     {
         rb = player.GetComponent<Rigidbody2D>();
         originX = transform.position.x;
+
+        Camera cam = Camera.main;
+
+        float camHeight = cam.orthographicSize * 2;
+        float camWidth = camHeight * Screen.width / Screen.height;
+
+        Vector3 currentScale = ground.transform.localScale;
+
+        ground.transform.localScale = new Vector3(
+            camWidth + 5,
+            currentScale.y,
+            currentScale.z
+        );
+
+        SpriteRenderer groundRenderer = ground.GetComponent<SpriteRenderer>();
+
+        Vector2 screenBounds = cam.ScreenToWorldPoint(new Vector3(
+            Screen.width,
+            Screen.height,
+            cam.transform.position.z
+        ));
+
+        ground.transform.position = new Vector3(
+            ground.transform.position.x,
+            -screenBounds.y - groundRenderer.bounds.extents.y,
+            ground.transform.position.z
+        );
     }
 
     // Update is called once per frame

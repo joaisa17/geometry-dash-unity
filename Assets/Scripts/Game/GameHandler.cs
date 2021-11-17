@@ -16,7 +16,7 @@ public class GameHandler : MonoBehaviour
     // We use a coroutine to be able to use wait time
     IEnumerator Init()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.25f);
 
         startEvent.Invoke();
     }
@@ -32,6 +32,13 @@ public class GameHandler : MonoBehaviour
 
     public void OnPlayerDied()
     {
+        StartCoroutine(PlayerDied());
+    }
+
+    IEnumerator PlayerDied()
+    {
+        GetComponent<AudioSource>().Stop();
+        yield return new WaitForSeconds(1f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

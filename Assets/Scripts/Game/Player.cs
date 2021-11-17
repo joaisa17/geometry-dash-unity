@@ -17,7 +17,6 @@ public class Player : MonoBehaviour
 
     // Rotation
     public float rotationSpeed = 5f;
-    public float rotationResetTime = 0.5f;
 
     // Events
     public UnityEvent winEvent;
@@ -33,9 +32,21 @@ public class Player : MonoBehaviour
     private bool dead = false;
 
     // Runs when script has initialized
-    void Start()
+    void Awake()
     {
+        Camera cam = Camera.main;
+
+        Vector2 screenBounds = cam.ScreenToWorldPoint(new Vector3(
+            Screen.width,
+            Screen.height,
+            cam.transform.position.z
+        ));
+
         rb = GetComponent<Rigidbody2D>();
+        rb.position = new Vector2(
+            -screenBounds.x - GetComponent<SpriteRenderer>().bounds.extents.x,
+            rb.position.y
+        );
 
         defaultPos = rb.position;
     }
@@ -65,6 +76,7 @@ public class Player : MonoBehaviour
         if (!active || !canJump || dead) return;
         canJump = false;
 
+        rb.angularVelocity = 0;
         rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
     }
 
@@ -84,7 +96,7 @@ public class Player : MonoBehaviour
     {
         if (collision == finishTrigger) winEvent.Invoke();
 
-        else StartCoroutine(Die());
+        else Die();
     }
 
     // Runs once per frame
@@ -95,9 +107,16 @@ public class Player : MonoBehaviour
         if (!dead)
         {
             rb.velocity = new Vector2(movementSpeed, rb.velocity.y);
-            rb.angularVelocity *= 0.5f;
 
-            if (!isTouchingObject) rb.SetRotation(rb.rotation - rotationSpeed * Time.fixedDeltaTime);
+            if (!isTouchingObject)
+            {
+                rb.SetRotation(rb.rotation - rotationSpeed * Time.fixedDeltaTime);
+            }
+
+            else
+            {
+                rb.angularVelocity /= 1.01f;
+            }
 
 
             // Loop through jump keybinds
@@ -111,7 +130,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    IEnumerator Die()
+    void Die()
     {
         dead = true;
 
@@ -120,7 +139,6 @@ public class Player : MonoBehaviour
         deathEffect.Play();
         GetComponent<SpriteRenderer>().enabled = false;
 
-        yield return new WaitForSeconds(1);
         dieEvent.Invoke();
     }
 }
