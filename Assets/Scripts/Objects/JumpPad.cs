@@ -18,7 +18,7 @@ namespace Assets.Scripts.Objects
 
             rb.velocity = new Vector2(
                 rb.velocity.x,
-                boostHeight
+                rb.gravityScale < 0 ? -boostHeight : boostHeight
             );
         }
     }

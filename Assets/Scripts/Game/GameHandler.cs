@@ -25,9 +25,9 @@ namespace Assets.Scripts.Game
 
         public void OnPlayerWin()
         {
-            var sceneCount = SceneManager.sceneCount;
+            var sceneCount = SceneManager.sceneCountInBuildSettings;
             var currentScene = SceneManager.GetActiveScene().buildIndex;
-            var nextScene = currentScene == sceneCount ? 0 : currentScene + 1;
+            var nextScene = currentScene == sceneCount - 1 ? 0 : currentScene + 1;
 
             SceneManager.LoadScene(nextScene);
         }
