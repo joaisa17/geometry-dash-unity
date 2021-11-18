@@ -1,155 +1,137 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
+using Assets.Scripts.Objects;
 using UnityEngine;
 using UnityEngine.Events;
-public class Player : MonoBehaviour
+
+namespace Assets.Scripts.Game
 {
-    public Collider2D finishTrigger;
-    public ParticleSystem deathEffect;
-
-    public KeyCode[] jumpKeys = {KeyCode.Space};
-    public bool enableJumpWithMouse = true;
-
-    // Physics
-    public float jumpingPower = 5f;
-    public float movementSpeed = 5f;
-
-    // Rotation
-    public float rotationSpeed = 5f;
-
-    // Events
-    public UnityEvent winEvent;
-    public UnityEvent dieEvent;
-
-    private Rigidbody2D rb;
-    private Vector2 defaultPos;
-
-    private bool active = false;
-    private bool canJump = true;
-    private bool isTouchingObject = true;
-
-    private bool dead = false;
-
-    private int gravityMultiplier = 1;
-
-    // Runs when script has initialized
-    void Awake()
+    public class Player : MonoBehaviour
     {
-        Camera cam = Camera.main;
+        public Collider2D finishTrigger;
+        public ParticleSystem deathEffect;
 
-        Vector2 screenBounds = cam.ScreenToWorldPoint(new Vector3(
-            Screen.width,
-            Screen.height,
-            cam.transform.position.z
-        ));
+        public KeyCode[] jumpKeys = {KeyCode.Space};
+        public bool enableJumpWithMouse = true;
 
-        rb = GetComponent<Rigidbody2D>();
-        rb.position = new Vector2(
-            -screenBounds.x - GetComponent<SpriteRenderer>().bounds.extents.x,
-            rb.position.y
-        );
+        // Physics
+        public float jumpingPower = 5f;
+        public float movementSpeed = 5f;
 
-        defaultPos = rb.position;
-    }
+        // Rotation
+        public float rotationSpeed = 5f;
 
-    // Runs when level has started
-    public void Init()
-    {
-        active = true;
+        // Events
+        public UnityEvent winEvent;
+        public UnityEvent dieEvent;
 
-        rb.WakeUp();
-        rb.velocity.Set(movementSpeed, rb.velocity.y);
-    }
+        private Rigidbody2D rigidbody2D;
+        private Vector2 defaultPosition;
 
-    // Runs when level is resetting
-    public void ResetState()
-    {
-        active = false;
-        dead = false;
+        private bool active;
+        private bool canJump = true;
+        private bool isTouchingObject = true;
 
-        rb.position.Set(defaultPos.x, defaultPos.y);
-        rb.velocity.Set(0, 0);
-        rb.Sleep();
-    }
+        private bool dead;
 
-    void Jump()
-    {
-        if (!active || !canJump || dead) return;
-        canJump = false;
+        private int gravityMultiplier = 1;
 
-        rb.angularVelocity = 0;
-        rb.velocity = new Vector2(rb.velocity.x, jumpingPower * gravityMultiplier);
-    }
-
-    private void OnCollisionEnter2D()
-    {
-        canJump = true;
-        isTouchingObject = true;
-    }
-
-    private void OnCollisionExit2D()
-    {
-        canJump = false;
-        isTouchingObject = false;
-    }
-
-    private bool TriggerKillsPlayer(Collider2D collision)
-    {
-        GameObject go = collision.gameObject;
-        if (go.GetComponent<JumpPad>() || go.GetComponent<GravityPad>() || go.GetComponent<GravityPortal>()) return false;
-
-        return true;
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision == finishTrigger) winEvent.Invoke();
-
-        else if (TriggerKillsPlayer(collision)) Die();
-    }
-
-    // Runs once per frame
-    void Update()
-    {
-        if (!active) return;
-
-        if (!dead)
+        private void Start()
         {
-            gravityMultiplier = rb.gravityScale < 0 ? -1 : 1;
+            if (TryGetComponent<Rigidbody2D>(out var rigidbody))
+                rigidbody2D = rigidbody;
+        }
 
-            rb.velocity = new Vector2(movementSpeed, rb.velocity.y);
+        // Runs when level has started
+        public void Init()
+        {
+            active = true;
 
+            rigidbody2D.WakeUp();
+            rigidbody2D.velocity.Set(movementSpeed, rigidbody2D.velocity.y);
+        }
+
+        // Runs when level is resetting
+        public void ResetState()
+        {
+            active = false;
+            dead = false;
+
+            rigidbody2D.position.Set(defaultPosition.x, defaultPosition.y);
+            rigidbody2D.velocity.Set(0, 0);
+            rigidbody2D.Sleep();
+        }
+
+        private void Jump()
+        {
+            if (!active || !canJump || dead) return;
+
+            canJump = false;
+
+            rigidbody2D.angularVelocity = 0;
+            rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, jumpingPower * gravityMultiplier);
+        }
+
+        private void OnCollisionEnter2D()
+        {
+            canJump = true;
+            isTouchingObject = true;
+        }
+
+        private void OnCollisionExit2D()
+        {
+            canJump = false;
+            isTouchingObject = false;
+        }
+
+        private static bool TriggerKillsPlayer(Collider2D collision)
+        {
+            var go = collision.gameObject;
+            return !go.GetComponent<JumpPad>() && !go.GetComponent<GravityPad>() && !go.GetComponent<GravityPortal>();
+        }
+
+        private void OnTriggerEnter2D(Collider2D collision)
+        {
+            if (collision == finishTrigger) winEvent.Invoke();
+            else if (TriggerKillsPlayer(collision)) Die();
+        }
+
+        // Runs once per frame
+        private void Update()
+        {
+            if (!active || dead) return;
+
+            gravityMultiplier = rigidbody2D.gravityScale < 0 ? -1 : 1;
+            rigidbody2D.velocity = new Vector2(movementSpeed, rigidbody2D.velocity.y);
             if (!isTouchingObject)
             {
-                rb.SetRotation(rb.rotation - rotationSpeed * Time.deltaTime * gravityMultiplier);
+                rigidbody2D.SetRotation(rigidbody2D.rotation - rotationSpeed * Time.deltaTime * gravityMultiplier);
             }
-
             else
             {
-                rb.angularVelocity /= 1.01f;
+                rigidbody2D.angularVelocity /= 1.01f;
             }
-
-
             // Loop through jump keybinds
-            for (int i = 0; i < jumpKeys.Length; i++)
+
+            foreach (var keyCode in jumpKeys)
             {
-                if (Input.GetKey(jumpKeys[i])) Jump();
+                if (Input.GetKey(keyCode)) Jump();
             }
 
             // Jump with mouse
-            if (enableJumpWithMouse && Input.GetMouseButton(0)) Jump();
+            if (enableJumpWithMouse && Input.GetMouseButton(0))
+                Jump();
         }
-    }
 
-    void Die()
-    {
-        dead = true;
+        private void Die()
+        {
+            dead = true;
 
-        rb.constraints = RigidbodyConstraints2D.FreezeAll;
+            rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
 
-        deathEffect.Play();
-        GetComponent<SpriteRenderer>().enabled = false;
+            deathEffect.Play();
+            GetComponent<SpriteRenderer>().enabled = false;
 
-        dieEvent.Invoke();
+            dieEvent.Invoke();
+        }
     }
 }

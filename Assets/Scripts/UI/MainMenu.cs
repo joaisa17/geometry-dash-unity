@@ -1,15 +1,18 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MainMenu : MonoBehaviour
+namespace Assets.Scripts.UI
 {
-    public void OnPlay()
+    public class MainMenu : MonoBehaviour
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-    }
+        public void OnPlay()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
 
-    public void OnQuit()
-    {
-        Application.Quit();
+        public void OnQuit()
+        {
+            Application.Quit();
+        }
     }
 }

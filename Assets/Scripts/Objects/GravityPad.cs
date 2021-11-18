@@ -1,16 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class GravityPad : MonoBehaviour
+namespace Assets.Scripts.Objects
 {
-    private bool debounce = false;
-    private void OnTriggerEnter2D(Collider2D collision)
+    public class GravityPad : MonoBehaviour
     {
-        Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
+        private bool debounce;
 
-        if (rb != null && !debounce)
+        private void OnTriggerEnter2D(Collider2D collision)
         {
+            var rb = collision.gameObject.GetComponent<Rigidbody2D>();
+
+            if (rb == null || debounce) return;
+
             debounce = true;
 
             rb.gravityScale *= -1;
