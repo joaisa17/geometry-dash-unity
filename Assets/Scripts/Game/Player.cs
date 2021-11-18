@@ -1,4 +1,3 @@
-using System.Linq;
 using Assets.Scripts.Objects;
 using UnityEngine;
 using UnityEngine.Events;
@@ -24,7 +23,7 @@ namespace Assets.Scripts.Game
         public UnityEvent winEvent;
         public UnityEvent dieEvent;
 
-        private Rigidbody2D rigidbody2D;
+        private Rigidbody2D rigidBody2D;
         private Vector2 defaultPosition;
 
         private bool active;
@@ -38,7 +37,7 @@ namespace Assets.Scripts.Game
         private void Start()
         {
             if (TryGetComponent<Rigidbody2D>(out var rigidbody))
-                rigidbody2D = rigidbody;
+                rigidBody2D = rigidbody;
         }
 
         // Runs when level has started
@@ -46,8 +45,8 @@ namespace Assets.Scripts.Game
         {
             active = true;
 
-            rigidbody2D.WakeUp();
-            rigidbody2D.velocity.Set(movementSpeed, rigidbody2D.velocity.y);
+            rigidBody2D.WakeUp();
+            rigidBody2D.velocity.Set(movementSpeed, rigidBody2D.velocity.y);
         }
 
         // Runs when level is resetting
@@ -56,9 +55,9 @@ namespace Assets.Scripts.Game
             active = false;
             dead = false;
 
-            rigidbody2D.position.Set(defaultPosition.x, defaultPosition.y);
-            rigidbody2D.velocity.Set(0, 0);
-            rigidbody2D.Sleep();
+            rigidBody2D.position.Set(defaultPosition.x, defaultPosition.y);
+            rigidBody2D.velocity.Set(0, 0);
+            rigidBody2D.Sleep();
         }
 
         private void Jump()
@@ -67,8 +66,8 @@ namespace Assets.Scripts.Game
 
             canJump = false;
 
-            rigidbody2D.angularVelocity = 0;
-            rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, jumpingPower * gravityMultiplier);
+            rigidBody2D.angularVelocity = 0;
+            rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, jumpingPower * gravityMultiplier);
         }
 
         private void OnCollisionEnter2D()
@@ -100,15 +99,15 @@ namespace Assets.Scripts.Game
         {
             if (!active || dead) return;
 
-            gravityMultiplier = rigidbody2D.gravityScale < 0 ? -1 : 1;
-            rigidbody2D.velocity = new Vector2(movementSpeed, rigidbody2D.velocity.y);
+            gravityMultiplier = rigidBody2D.gravityScale < 0 ? -1 : 1;
+            rigidBody2D.velocity = new Vector2(movementSpeed, rigidBody2D.velocity.y);
             if (!isTouchingObject)
             {
-                rigidbody2D.SetRotation(rigidbody2D.rotation - rotationSpeed * Time.deltaTime * gravityMultiplier);
+                rigidBody2D.SetRotation(rigidBody2D.rotation - rotationSpeed * Time.deltaTime * gravityMultiplier);
             }
             else
             {
-                rigidbody2D.angularVelocity /= 1.01f;
+                rigidBody2D.angularVelocity /= 1.01f;
             }
             // Loop through jump keybinds
 
@@ -126,7 +125,7 @@ namespace Assets.Scripts.Game
         {
             dead = true;
 
-            rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+            rigidBody2D.constraints = RigidbodyConstraints2D.FreezeAll;
 
             deathEffect.Play();
             GetComponent<SpriteRenderer>().enabled = false;

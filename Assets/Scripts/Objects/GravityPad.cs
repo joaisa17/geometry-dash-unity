@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Game;
 
 namespace Assets.Scripts.Objects
 {
