@@ -6,15 +6,19 @@ public class CameraHandler : MonoBehaviour
 {
     public GameObject player;
     public GameObject ground;
+    public GameObject ceiling;
 
     public Vector2 positionOffset;
 
     public float moveTime = 0.5f;
 
     private Rigidbody2D rb;
-    private float currentSpeed = 0;
+    private Vector3 currentSpeed;
 
     private float originX;
+    private float originY;
+
+    private Camera cam;
 
     private bool active = false;
 
@@ -32,9 +36,11 @@ public class CameraHandler : MonoBehaviour
     void Start()
     {
         rb = player.GetComponent<Rigidbody2D>();
-        originX = transform.position.x;
 
-        Camera cam = Camera.main;
+        originX = transform.position.x;
+        originY = transform.position.y;
+
+        cam = Camera.main;
 
         float camHeight = cam.orthographicSize * 2;
         float camWidth = camHeight * Screen.width / Screen.height;
@@ -67,19 +73,27 @@ public class CameraHandler : MonoBehaviour
     {
         if (!active) return;
 
-        float targetPos = Mathf.Clamp(rb.position.x + positionOffset.x, originX, Mathf.Infinity);
+        float screenHeightInUnits = cam.ScreenToWorldPoint(new Vector3(
+            0,
+            Screen.height,
+            0
+        )).y - cam.ScreenToWorldPoint(new Vector3(
+            0,
+            0,
+            0
+        )).y;
 
-        float newPos = Mathf.SmoothDamp(
-            transform.position.x,
+        Vector3 targetPos = new Vector3(
+            Mathf.Clamp(rb.position.x + positionOffset.x, originX, Mathf.Infinity),
+            Mathf.Clamp(rb.position.y + positionOffset.y, originY, ceiling.transform.position.y - screenHeightInUnits),
+            transform.position.z
+        );
+
+        transform.position = Vector3.SmoothDamp(
+            transform.position,
             targetPos,
             ref currentSpeed,
             moveTime
-        );
-
-        transform.position = new Vector3(
-            newPos,
-            transform.position.y + positionOffset.y,
-            transform.position.z
         );
 
         ground.transform.position = new Vector3(
